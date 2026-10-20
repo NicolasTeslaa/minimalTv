@@ -10,6 +10,7 @@ class AppLauncher(private val context: Context, private val preferences: Prefere
     fun launch(app: TvApp): Boolean {
         val component = ComponentName.unflattenFromString(app.componentName) ?: return false
         val intent = Intent(Intent.ACTION_MAIN).setComponent(component)
+            .addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return try {
             context.startActivity(intent)

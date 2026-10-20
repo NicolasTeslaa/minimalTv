@@ -8,7 +8,7 @@ import android.widget.ImageView
 import java.util.concurrent.ExecutorService
 
 class AppIconLoader(private val context: Context, private val executor: ExecutorService) {
-    private val size = (68 * context.resources.displayMetrics.density).toInt().coerceAtLeast(1)
+    private val size = (48 * context.resources.displayMetrics.density).toInt().coerceAtLeast(1)
     private val cache = object : LruCache<String, Bitmap>(2 * 1024 * 1024) {
         override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount
     }

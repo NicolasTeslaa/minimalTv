@@ -33,7 +33,7 @@ TV de resolução física 1920×1080, resolução lógica atual 1280×720, densi
 
 ## Brand Commitments
 
-Nome “Minimal TV”, subtítulo “Your apps. Nothing else.” e fundo `#10151C` definidos no briefing. Direção cromática violeta escolhida pelo usuário.
+Nome “Minimal TV”, subtítulo “Your apps. Nothing else.” e direção violeta silenciosa escolhida pelo usuário: fundo `#0F1218`, cartões `#1B202B`, foco `#BCA0FF`.
 
 ## Evidence on Hand
 

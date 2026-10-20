@@ -75,7 +75,7 @@ class MainActivityTest {
         }
     }
 
-    @Test fun homeShowsFourColumnGridWithInitialFocus() {
+    @Test fun homeShowsSixColumnGridWithInitialFocus() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
         val activity = instrumentation.startActivitySync(
@@ -84,7 +84,7 @@ class MainActivityTest {
         try {
             val grid = activity.findViewById<RecyclerView>(R.id.appGrid)
             assertNotNull(grid)
-            assertEquals(4, (grid.layoutManager as GridLayoutManager).spanCount)
+            assertEquals(6, (grid.layoutManager as GridLayoutManager).spanCount)
             val deadline = System.currentTimeMillis() + 8_000
             while ((grid.adapter?.itemCount ?: 0) == 0 && System.currentTimeMillis() < deadline) {
                 Thread.sleep(100)

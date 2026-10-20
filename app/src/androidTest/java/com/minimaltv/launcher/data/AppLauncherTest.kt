@@ -30,6 +30,8 @@ class AppLauncherTest {
             assertTrue(AppLauncher(starter, repository).launch(app))
             assertEquals("com.example.video", launched?.component?.packageName)
             assertEquals("com.example.video.TvActivity", launched?.component?.className)
+            assertEquals(Intent.ACTION_MAIN, launched?.action)
+            assertTrue(Intent.CATEGORY_LEANBACK_LAUNCHER in (launched?.categories ?: emptySet()))
             assertEquals(1, repository.launchCounts()[app.packageName])
         } finally { prefs.edit().clear().commit() }
     }

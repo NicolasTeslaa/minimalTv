@@ -23,6 +23,11 @@ pacotes e atualização do relógio. A execução local dos testes e do build pe
 pendente porque este ambiente não possui JDK; não há nova evidência de execução
 física nesta rodada.
 
+Nesta rodada, o componente HBO Max foi confirmado no hardware como
+`com.wbd.stream/com.wbd.beam.BeamActivity`; o comando ADB explícito retornou
+`Status: ok`. O APK instalado durante a investigação era anterior ao commit que
+conectou os callbacks da Home.
+
 - Descoberta Leanback, fallback Launcher, deduplicação e app desabilitado.
 - OK curto, OK longo sem abertura no KEY_UP, falha de abertura sem aumento da contagem.
 - Atualização após instalação/remoção, foco após mudança, retorno de app externo e Back.

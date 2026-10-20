@@ -67,7 +67,7 @@ class MainActivity : Activity() {
         icons = AppIconLoader(this, worker)
         grid = findViewById(R.id.appGrid)
         val width = resources.displayMetrics.widthPixels
-        val columns = if (width >= 1600) 6 else if (width >= 1000) 4 else 3
+        val columns = if (width >= 1200) 6 else if (width >= 900) 5 else 4
         grid.layoutManager = GridLayoutManager(this, columns)
         grid.setHasFixedSize(true)
         adapter = AppGridAdapter(icons,
