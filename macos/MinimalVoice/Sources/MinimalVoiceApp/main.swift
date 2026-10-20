@@ -172,12 +172,18 @@ struct MinimalVoiceView: View {
             .padding(24)
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
 
-            Button(controller.state == .listening ? "Parar de escutar" : "Começar a escutar") {
+            Button(controller.state == .listening ? "Parar e executar" : "Começar a escutar") {
                 controller.toggleListening()
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .keyboardShortcut(.space, modifiers: [])
+
+            if controller.state == .listening {
+                Text("Fale seu comando e clique em “Parar e executar”.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
 
             if let errorMessage = controller.errorMessage {
                 Text(errorMessage)

@@ -26,6 +26,7 @@ expect(parser.parse("fazer alguma coisa que não existe") == nil, "comando desco
 let builder = AdbCommandBuilder(serial: "192.168.1.9:5555")
 expect(
     builder.commands(for: .launchApp(package: "com.netflix.ninja")) == [
+        AdbCommand(arguments: ["-s", "192.168.1.9:5555", "shell", "input", "keyevent", "224"]),
         AdbCommand(arguments: ["-s", "192.168.1.9:5555", "shell", "monkey", "-p", "com.netflix.ninja", "1"])
     ],
     "lançar Netflix via ADB"
@@ -33,6 +34,7 @@ expect(
 expect(
     builder.commands(for: .closeApp(package: "com.netflix.ninja")) == [
         AdbCommand(arguments: ["-s", "192.168.1.9:5555", "shell", "am", "force-stop", "com.netflix.ninja"]),
+        AdbCommand(arguments: ["-s", "192.168.1.9:5555", "shell", "input", "keyevent", "224"]),
         AdbCommand(arguments: ["-s", "192.168.1.9:5555", "shell", "monkey", "-p", "com.minimaltv.launcher", "1"])
     ],
     "fechar Netflix e voltar ao Minimal TV"
@@ -55,7 +57,7 @@ final class RecordingAdbRunner: AdbCommandRunning {
 let runner = RecordingAdbRunner()
 let executor = ProcessAdbExecutor(builder: builder, runner: runner)
 try! executor.execute(.launchApp(package: "com.netflix.ninja"))
-expect(runner.executed.count == 1, "executor executa o comando ADB")
+expect(runner.executed.count == 2, "executor acorda a TV e executa o comando ADB")
 expect(SpeechConfiguration.requiresOnDeviceRecognition, "reconhecimento somente no dispositivo")
 expect(SpeechSetupGuide.steps.contains { $0.localizedCaseInsensitiveContains("Siri") }, "orientação para ativar Siri")
 expect(SpeechSetupGuide.steps.contains { $0.localizedCaseInsensitiveContains("Ditado") }, "orientação para ativar Ditado")

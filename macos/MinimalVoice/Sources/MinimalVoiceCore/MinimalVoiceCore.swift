@@ -256,11 +256,11 @@ public struct AdbCommandBuilder: Sendable {
         case .powerOff:
             return [command("shell", "input", "keyevent", "26")]
         case .launchApp(let package):
-            return [launch(package)]
+            return [wake(), launch(package)]
         case .closeApp(let package):
-            return [command("shell", "am", "force-stop", package), launch(TvConfiguration.minimalTvPackage)]
+            return [command("shell", "am", "force-stop", package), wake(), launch(TvConfiguration.minimalTvPackage)]
         case .returnToMinimalTv:
-            return [launch(TvConfiguration.minimalTvPackage)]
+            return [wake(), launch(TvConfiguration.minimalTvPackage)]
         case .volumeUp:
             return [keyevent(24)]
         case .volumeDown:
@@ -283,6 +283,10 @@ public struct AdbCommandBuilder: Sendable {
 
     private func keyevent(_ key: Int) -> AdbCommand {
         command("shell", "input", "keyevent", String(key))
+    }
+
+    private func wake() -> AdbCommand {
+        keyevent(224)
     }
 
     private func command(_ arguments: String...) -> AdbCommand {
