@@ -28,6 +28,12 @@ Nesta rodada, o componente HBO Max foi confirmado no hardware como
 `Status: ok`. O APK instalado durante a investigação era anterior ao commit que
 conectou os callbacks da Home.
 
+Os pacotes `com.google.android.videos`, `com.google.android.play.games` e
+`com.google.android.youtube.tvmusic` foram removidos para o usuário 0 com retorno
+ADB `Success`. Os componentes MediaTek `com.mediatek.wwtv.tvcenter`,
+`com.mediatek.wwtv.mediaplayer` e `com.mediatek.androidbox` permanecem instalados e
+são filtrados somente da Home.
+
 - Descoberta Leanback, fallback Launcher, deduplicação e app desabilitado.
 - OK curto, OK longo sem abertura no KEY_UP, falha de abertura sem aumento da contagem.
 - Atualização após instalação/remoção, foco após mudança, retorno de app externo e Back.

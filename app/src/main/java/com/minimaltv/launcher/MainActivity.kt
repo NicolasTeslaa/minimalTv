@@ -21,6 +21,7 @@ import com.minimaltv.launcher.data.AppLauncher
 import com.minimaltv.launcher.data.AppOrder
 import com.minimaltv.launcher.data.AppRepository
 import com.minimaltv.launcher.data.PreferencesRepository
+import com.minimaltv.launcher.data.AppVisibility
 import com.minimaltv.launcher.model.TvApp
 import com.minimaltv.launcher.ui.AppGridAdapter
 import com.minimaltv.launcher.ui.AppIconLoader
@@ -123,7 +124,8 @@ class MainActivity : Activity() {
 
     private fun refreshApps() {
         worker.execute {
-            val apps = AppOrder.sort(repository.loadApps(), preferences.favorites(), preferences.launchCounts())
+            val visibleApps = AppVisibility.filter(repository.loadApps(), HIDDEN_SYSTEM_APPS)
+            val apps = AppOrder.sort(visibleApps, preferences.favorites(), preferences.launchCounts())
             runOnUiThread {
                 if (!isFinishing && !isDestroyed) showApps(apps)
             }
@@ -198,5 +200,10 @@ class MainActivity : Activity() {
 
     private companion object {
         const val CLOCK_UPDATE_MS = 60_000L
+        val HIDDEN_SYSTEM_APPS = setOf(
+            "com.mediatek.wwtv.tvcenter",
+            "com.mediatek.wwtv.mediaplayer",
+            "com.mediatek.androidbox"
+        )
     }
 }

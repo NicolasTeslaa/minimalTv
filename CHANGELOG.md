@@ -12,6 +12,9 @@
 - Home compactada para seis colunas em 1280×720, ícones de 48dp e paleta violeta silenciosa.
 - Home recebeu fundo nativo em ondas azul-roxas, cards translúcidos, foco azul luminoso
   e pill de relógio/configurações alinhado à referência enviada.
+- Play Filmes, Play Games e YouTube Music foram removidos do usuário da TV; componentes
+  MediaTek de Live TV, MultiMediaPlayer e Wi-Fi Display Sink ficam instalados, mas ocultos
+  apenas da grade do Minimal TV.
 
 ### Verificação desta rodada
 
