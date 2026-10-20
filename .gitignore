@@ -5,3 +5,4 @@ app/build/
 local.properties
 *.iml
 .DS_Store
+macos/**/.build/
