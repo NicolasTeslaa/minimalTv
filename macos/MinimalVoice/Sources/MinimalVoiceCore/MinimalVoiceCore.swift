@@ -151,12 +151,59 @@ public struct AdbCommand: Equatable, Sendable {
     }
 }
 
+public enum AdbDeviceList {
+    public static func parse(_ output: String) -> [String] {
+        output
+            .split(whereSeparator: \.isNewline)
+            .dropFirst()
+            .compactMap { line in
+                let columns = line.split(whereSeparator: { $0 == " " || $0 == "\t" })
+                guard columns.count >= 2, columns[1] == "device" else { return nil }
+                return String(columns[0])
+            }
+    }
+}
+
+public final class ProcessAdbDeviceDiscovery {
+    public init() {}
+
+    public func firstAvailableSerial() -> String? {
+        let process = Process()
+        let output = Pipe()
+        let executable = [
+            "/opt/homebrew/bin/adb",
+            "/usr/local/bin/adb",
+            "/usr/bin/adb"
+        ].first { FileManager.default.isExecutableFile(atPath: $0) } ?? "/usr/bin/env"
+        process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = executable == "/usr/bin/env" ? ["adb", "devices"] : ["devices"]
+        process.standardOutput = output
+        process.standardError = output
+        do {
+            try process.run()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return nil }
+            let data = output.fileHandleForReading.readDataToEndOfFile()
+            return AdbDeviceList.parse(String(decoding: data, as: UTF8.self)).first
+        } catch {
+            return nil
+        }
+    }
+}
+
 public protocol AdbCommandRunning: AnyObject {
     func run(_ command: AdbCommand) throws
 }
 
-public enum AdbExecutionError: Error, Equatable {
+public enum AdbExecutionError: Error, Equatable, LocalizedError {
     case failed(arguments: [String], status: Int32)
+
+    public var errorDescription: String? {
+        switch self {
+        case let .failed(_, status):
+            return "O ADB não conseguiu executar o comando (código \(status)). Verifique se a TV está ligada e autorizada."
+        }
+    }
 }
 
 public final class ProcessAdbRunner: AdbCommandRunning {

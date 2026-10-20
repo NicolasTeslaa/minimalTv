@@ -59,6 +59,10 @@ expect(runner.executed.count == 1, "executor executa o comando ADB")
 expect(SpeechConfiguration.requiresOnDeviceRecognition, "reconhecimento somente no dispositivo")
 expect(SpeechSetupGuide.steps.contains { $0.localizedCaseInsensitiveContains("Siri") }, "orientação para ativar Siri")
 expect(SpeechSetupGuide.steps.contains { $0.localizedCaseInsensitiveContains("Ditado") }, "orientação para ativar Ditado")
+expect(
+    AdbDeviceList.parse("List of devices attached\nadb-tv._adb-tls-connect._tcp device product:TV model:SMART_TV\n").first == "adb-tv._adb-tls-connect._tcp",
+    "descoberta de TV ADB autorizada"
+)
 expect(VoiceSessionState.idle.canStartListening, "estado inativo permite iniciar")
 expect(!VoiceSessionState.transcribing.canExecuteCommand, "transcrição bloqueia execução")
 print("PASS: MinimalVoiceCoreSpec")

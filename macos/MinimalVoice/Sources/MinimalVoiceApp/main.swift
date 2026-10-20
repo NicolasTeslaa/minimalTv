@@ -11,6 +11,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     @Published private(set) var feedback = "Pronto para ouvir"
     @Published private(set) var errorMessage: String?
     @Published private(set) var needsSpeechSetup = false
+    let tvSerial: String
 
     private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "pt-BR"))
     private let audioEngine = AVAudioEngine()
@@ -20,7 +21,9 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     private let executor: ProcessAdbExecutor
 
     init(serial: String = UserDefaults.standard.string(forKey: "tvSerial") ?? TvConfiguration.defaultSerial) {
-        executor = ProcessAdbExecutor(builder: AdbCommandBuilder(serial: serial))
+        let resolvedSerial = UserDefaults.standard.string(forKey: "tvSerial") ?? ProcessAdbDeviceDiscovery().firstAvailableSerial() ?? serial
+        tvSerial = resolvedSerial
+        executor = ProcessAdbExecutor(builder: AdbCommandBuilder(serial: resolvedSerial))
         super.init()
         recognizer?.delegate = self
     }
@@ -205,6 +208,10 @@ struct MinimalVoiceView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+
+            Text("TV ADB: \(controller.tvSerial)")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
         }
         .padding(36)
         .frame(width: 520, height: 390)

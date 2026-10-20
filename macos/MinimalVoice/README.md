@@ -11,7 +11,7 @@ cd macos/MinimalVoice
 
 Na primeira execução, autorize o microfone e o reconhecimento de voz. O Mac precisa estar na mesma rede da TV e o ADB precisa estar autorizado.
 
-O serial padrão é `192.168.1.9:36661`. Para trocar:
+O app procura automaticamente a primeira TV ADB autorizada. Isso funciona mesmo quando a TV aparece com um serial de descoberta de rede e o IP muda. Para fixar um serial:
 
 ```bash
 defaults write com.minimaltv.voice tvSerial 192.168.1.9:36661
