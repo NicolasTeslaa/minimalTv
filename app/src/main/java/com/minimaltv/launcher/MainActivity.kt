@@ -17,6 +17,7 @@ import android.widget.Toast
 import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.minimaltv.launcher.data.AppLauncher
 import com.minimaltv.launcher.data.AppOrder
 import com.minimaltv.launcher.data.AppRepository
 import com.minimaltv.launcher.data.PreferencesRepository
