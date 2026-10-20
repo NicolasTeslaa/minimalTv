@@ -9,6 +9,14 @@ cd macos/MinimalVoice
 ./scripts/build-and-run.sh
 ```
 
+Para instalar em um caminho fixo e evitar novos pedidos de permissão a cada build:
+
+```bash
+./scripts/install-and-run.sh
+```
+
+Esse comando instala em `~/Applications/Minimal Voice.app`. O macOS normalmente mantém as permissões para esse bundle; uma atualização que altere a assinatura ou o bundle pode pedir confirmação novamente.
+
 Na primeira execução, autorize o microfone e o reconhecimento de voz. O Mac precisa estar na mesma rede da TV e o ADB precisa estar autorizado.
 
 O app procura automaticamente a primeira TV ADB autorizada. Isso funciona mesmo quando a TV aparece com um serial de descoberta de rede e o IP muda. Para fixar um serial:
