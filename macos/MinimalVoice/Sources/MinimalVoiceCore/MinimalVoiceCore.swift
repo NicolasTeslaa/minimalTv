@@ -2,6 +2,7 @@ import Foundation
 
 public enum SpeechConfiguration {
     public static let requiresOnDeviceRecognition = true
+    public static let automaticExecutionPauseNanoseconds: UInt64 = 1_200_000_000
 }
 
 public enum SpeechSetupGuide {

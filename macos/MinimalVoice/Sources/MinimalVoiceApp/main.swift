@@ -17,6 +17,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
+    private var automaticExecutionTask: Task<Void, Never>?
     private let parser = CommandParser()
     private let executor: ProcessAdbExecutor
 
@@ -79,6 +80,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
                 guard let self else { return }
                 if let result {
                     self.transcript = result.bestTranscription.formattedString
+                    self.scheduleAutomaticExecution()
                     if result.isFinal { self.executeTranscript() }
                 }
                 if let error, self.state == .listening {
@@ -92,6 +94,8 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     }
 
     private func stopListening() {
+        automaticExecutionTask?.cancel()
+        automaticExecutionTask = nil
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
@@ -101,6 +105,8 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
 
     private func executeTranscript() {
         guard state == .listening || state == .transcribing else { return }
+        automaticExecutionTask?.cancel()
+        automaticExecutionTask = nil
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest = nil
@@ -128,6 +134,8 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     }
 
     private func fail(_ message: String, speechSetup: Bool = false) {
+        automaticExecutionTask?.cancel()
+        automaticExecutionTask = nil
         audioEngine.stop()
         if audioEngine.inputNode.numberOfInputs > 0 {
             audioEngine.inputNode.removeTap(onBus: 0)
@@ -139,6 +147,22 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         errorMessage = message
         needsSpeechSetup = speechSetup
         feedback = "Tente novamente"
+    }
+
+    private func scheduleAutomaticExecution() {
+        automaticExecutionTask?.cancel()
+        automaticExecutionTask = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: SpeechConfiguration.automaticExecutionPauseNanoseconds)
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                guard let self, self.state == .listening, self.parser.parse(self.transcript) != nil else { return }
+                self.executeTranscript()
+            }
+        }
     }
 
     func openSpeechSettings() {
@@ -180,7 +204,7 @@ struct MinimalVoiceView: View {
             .keyboardShortcut(.space, modifiers: [])
 
             if controller.state == .listening {
-                Text("Fale seu comando e clique em “Parar e executar”.")
+                Text("Fale um comando; ele será executado após uma breve pausa.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
