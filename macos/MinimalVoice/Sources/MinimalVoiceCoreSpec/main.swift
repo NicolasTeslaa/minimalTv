@@ -10,18 +10,18 @@ func expect(_ condition: @autoclosure () -> Bool, _ message: String) {
 
 let parser = CommandParser()
 expect(parser.parse("abrir Netflix") == .launchApp(package: "com.netflix.ninja"), "abrir Netflix")
-expect(parser.parse("abre HBO") == .launchApp(package: "com.hbo.hbonow"), "abre HBO")
-expect(parser.parse("abre a HBO") == .launchApp(package: "com.hbo.hbonow"), "abre a HBO")
+expect(parser.parse("abre HBO") == .launchApp(package: "com.wbd.stream"), "abre HBO")
+expect(parser.parse("abre a HBO") == .launchApp(package: "com.wbd.stream"), "abre a HBO")
 expect(parser.parse("fecha Netflix") == .closeApp(package: "com.netflix.ninja"), "fecha Netflix")
 expect(parser.parse("ligar televisão") == .powerOn, "ligar televisão")
 expect(parser.parse("desligar a TV") == .powerOff, "desligar TV")
-expect(parser.parse("fechar HBO Max") == .closeApp(package: "com.hbo.hbonow"), "fechar HBO Max")
+expect(parser.parse("fechar HBO Max") == .closeApp(package: "com.wbd.stream"), "fechar HBO Max")
 expect(parser.parse("aumentar volume") == .volumeUp, "aumentar volume")
 expect(parser.parse("abaixar volume em 10") == .volumeAdjust(-10), "abaixar volume em 10")
 expect(parser.parse("mutar televisão") == .mute, "mutar televisão")
 expect(
     parser.parse("abrir Supernatural na HBO") ==
-        .manualSearch(appPackage: "com.hbo.hbonow", title: "Supernatural"),
+        .manualSearch(appPackage: "com.wbd.stream", title: "Supernatural"),
     "busca manual na HBO"
 )
 expect(parser.parse("fazer alguma coisa que não existe") == nil, "comando desconhecido")
@@ -33,6 +33,13 @@ expect(
         AdbCommand(arguments: ["-s", "192.168.1.9:5555", "shell", "monkey", "-p", "com.netflix.ninja", "1"])
     ],
     "lançar Netflix via ADB"
+)
+expect(
+    builder.commands(for: .launchApp(package: "com.wbd.stream")) == [
+        AdbCommand(arguments: ["-s", "192.168.1.9:5555", "shell", "input", "keyevent", "224"]),
+        AdbCommand(arguments: ["-s", "192.168.1.9:5555", "shell", "am", "start", "-n", "com.wbd.stream/com.wbd.beam.BeamActivity"])
+    ],
+    "lançar HBO pela Activity correta"
 )
 expect(
     builder.commands(for: .closeApp(package: "com.netflix.ninja")) == [

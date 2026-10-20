@@ -152,8 +152,8 @@ public struct CommandParser: Sendable {
 
     private static let apps = [
         (alias: "netflix", package: "com.netflix.ninja"),
-        (alias: "hbo", package: "com.hbo.hbonow"),
-        (alias: "hbo max", package: "com.hbo.hbonow"),
+        (alias: "hbo", package: "com.wbd.stream"),
+        (alias: "hbo max", package: "com.wbd.stream"),
         (alias: "prime", package: "com.amazon.amazonvideo.livingroom"),
         (alias: "prime video", package: "com.amazon.amazonvideo.livingroom"),
         (alias: "youtube", package: "com.google.android.youtube.tv")
@@ -295,7 +295,10 @@ public struct AdbCommandBuilder: Sendable {
     }
 
     private func launch(_ package: String) -> AdbCommand {
-        command("shell", "monkey", "-p", package, "1")
+        if package == "com.wbd.stream" {
+            return command("shell", "am", "start", "-n", "com.wbd.stream/com.wbd.beam.BeamActivity")
+        }
+        return command("shell", "monkey", "-p", package, "1")
     }
 
     private func keyevent(_ key: Int) -> AdbCommand {
