@@ -1,14 +1,63 @@
 # Minimal TV
 
-Launcher Android TV em Kotlin, Android Views e RecyclerView. A Home mostra aplicativos instalados, favoritos primeiro, sem anúncios, feeds ou rede própria.
+Um launcher Android TV feito para uma coisa: abrir seus aplicativos rapidamente, usando apenas o controle remoto.
 
-## Requisitos de desenvolvimento
+Sem feeds, anúncios, recomendações ou serviços próprios rodando em segundo plano. A Home é compacta, offline e pensada para uma TV de sala.
 
-- macOS Apple Silicon ou outro ambiente com JDK 17 e Android SDK.
-- Android SDK Platform 35, Build Tools 35.0.0 e Platform Tools.
-- TV ou emulador Android TV; Android 14 é o alvo testado.
+![Minimal TV em uma TV Aiwa/KTC](docs/images/minimal-tv-home.png)
 
-Defina `JAVA_HOME` para um JDK 17 e `ANDROID_HOME` para a raiz do SDK. No ambiente usado neste projeto:
+> Captura real feita via ADB em uma TV Aiwa/KTC com resolução lógica de 1280×720.
+
+## O que ele faz
+
+- Descobre automaticamente aplicativos instalados com `LEANBACK_LAUNCHER` ou `LAUNCHER`.
+- Mostra uma grade de seis colunas em 1280×720.
+- Abre aplicativos com OK, incluindo Netflix, HBO Max, Prime Video e Play Store.
+- Ordena favoritos antes dos demais e registra a quantidade de aberturas.
+- Mantém favoritos e histórico entre reinicializações.
+- Usa pressão longa em OK para adicionar ou remover favoritos.
+- Atualiza a lista quando aplicativos são instalados, atualizados ou removidos.
+- Restaura o foco do controle remoto depois de retornar de um app externo.
+- Inclui acesso às configurações do Android TV.
+- Não exige internet, não altera firmware e não precisa ser o Home padrão.
+
+## Direção visual
+
+A interface usa uma linguagem azul‑roxa com fundo desenhado nativamente, cards azul‑marinho translúcidos e foco azul luminoso.
+
+| Elemento | Direção |
+| --- | --- |
+| Fundo | `#050A19` com ondas azul/roxo |
+| Cards | Azul‑marinho translúcido |
+| Foco | `#79C8FF` |
+| Texto | `#F4F7FF` |
+| Grade | 6 colunas em 1280×720 |
+| Ícones | 48dp, carregados do pacote real |
+
+## Hardware validado
+
+O projeto foi exercitado em uma TV Aiwa/KTC com:
+
+- Android TV 14 / API 34;
+- resolução lógica 1280×720 e física 1920×1080;
+- densidade 213 dpi;
+- ABI `armeabi-v7a, armeabi`;
+- conexão ADB sem fio;
+- aproximadamente 913 MiB de RAM reportados pelo sistema.
+
+O endereço ADB é dinâmico. O serial usado durante a validação foi `192.168.1.9:36661`.
+
+## Desenvolvimento
+
+Requisitos:
+
+- JDK 17;
+- Android SDK Platform 35;
+- Build Tools 35.0.0;
+- Platform Tools;
+- Gradle Wrapper incluído no projeto.
+
+No macOS Apple Silicon, o ambiente usado foi:
 
 ```bash
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
@@ -23,47 +72,108 @@ export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-O APK debug fica em `app/build/outputs/apk/debug/app-debug.apk`. Use `adb devices -l` para descobrir o serial atual; a porta de ADB sem fio é dinâmica.
+O APK gerado fica em:
 
-## Instalação e abertura como app comum
-
-Substitua `<serial>` pelo dispositivo listado em `adb devices -l`:
-
-```bash
-adb -s <serial> install -r app/build/outputs/apk/debug/app-debug.apk
-adb -s <serial> shell am start -n com.minimaltv.launcher/.MainActivity
+```text
+app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Esses comandos não definem o launcher padrão. A instalação permite testar a Home e abrir aplicativos sem afetar a tela inicial original.
+## Instalar na TV
 
-## Diagnóstico e desempenho
+Descubra o serial atual:
 
 ```bash
-adb -s <serial> shell dumpsys meminfo -s com.google.android.tvlauncher
+adb devices -l
+```
+
+Depois compile e instale:
+
+```bash
+./gradlew clean :app:assembleDebug
+
+adb -s <serial> install -r \
+  app/build/outputs/apk/debug/app-debug.apk
+
+adb -s <serial> shell am force-stop com.minimaltv.launcher
+adb -s <serial> shell am start \
+  -n com.minimaltv.launcher/.MainActivity
+```
+
+Essa instalação abre o Minimal TV como um app comum e não troca o Home padrão.
+
+## Usar como Home
+
+Alguns firmwares de Android TV escondem a tela de escolha de launcher. Quando o comando é suportado, use:
+
+```bash
+adb -s <serial> shell cmd package set-home-activity \
+  --user 0 com.minimaltv.launcher/.MainActivity
+```
+
+O projeto não remove nem desativa automaticamente o launcher original. Em TVs que forçam o launcher de fábrica, o botão Home pode continuar abrindo o launcher da Google mesmo depois da preferência ser gravada.
+
+## Recuperação segura
+
+Mantenha o launcher da Google instalado. Para reativá-lo:
+
+```bash
+adb -s <serial> shell pm enable \
+  --user 0 com.google.android.tvlauncher
+
+adb -s <serial> shell cmd package set-home-activity \
+  --user 0 com.google.android.tvlauncher/.MainActivity
+```
+
+Não use `pm uninstall --user 0` nem `pm disable-user` em componentes MediaTek da TV sem um procedimento de recuperação confirmado.
+
+## Pacotes específicos da TV
+
+Na TV validada, os seguintes componentes são mantidos instalados e apenas ocultados da grade do Minimal TV:
+
+```text
+com.mediatek.wwtv.tvcenter
+com.mediatek.wwtv.mediaplayer
+com.mediatek.androidbox
+```
+
+Play Filmes, Play Games e YouTube Music foram removidos somente para o usuário Android 0. Eles podem ser restaurados com:
+
+```bash
+adb -s <serial> shell cmd package install-existing --user 0 com.google.android.videos
+adb -s <serial> shell cmd package install-existing --user 0 com.google.android.play.games
+adb -s <serial> shell cmd package install-existing --user 0 com.google.android.youtube.tvmusic
+```
+
+## Arquitetura
+
+O projeto possui um único módulo Android e uma Activity principal:
+
+```text
+app/
+├── data/       descoberta, launch, persistência, ordenação e visibilidade
+├── model/      modelo TvApp
+├── ui/         adapter, foco, ícones e fundo visual
+├── res/layout/ telas da Home e cards
+└── src/test/   regras puras e testes de comportamento
+```
+
+As consultas ao `PackageManager` acontecem fora da thread principal. Favoritos e contadores usam `SharedPreferences`. A Activity observa mudanças de pacotes sem polling contínuo.
+
+## Diagnóstico
+
+```bash
 adb -s <serial> shell dumpsys meminfo -s com.minimaltv.launcher
 adb -s <serial> shell top -b -n 1 -m 15
-adb -s <serial> shell cat /proc/meminfo
 adb -s <serial> logcat -d -t 500 | grep -E 'com.minimaltv.launcher|FATAL EXCEPTION|ANR'
 ```
 
-Compare medições após o mesmo tempo desde a inicialização, com os mesmos aplicativos abertos. PSS e RSS representam medidas diferentes; RSS de processos não deve ser somado como memória exclusiva.
+PSS, RSS e CPU devem ser comparados sob as mesmas condições. As metas de desempenho documentadas são metas de engenharia, não garantias.
 
-## Recuperação e remoção segura
+## Documentação adicional
 
-O Minimal TV não desativa nem remove `com.google.android.tvlauncher`. Para retornar ao launcher original após uma eventual seleção manual de Home, abra **Configurações do Android TV → Apps → Apps padrão → App de início/Home** e selecione o launcher de fábrica. A nomenclatura pode variar no firmware. Teste esse caminho no aparelho antes de qualquer troca manual.
-
-Se a configuração Home não estiver disponível, use ADB para abrir as configurações do sistema, sem desativar pacotes:
-
-```bash
-adb -s <serial> shell am start -a android.settings.SETTINGS
-```
-
-Para remover apenas o Minimal TV:
-
-```bash
-adb -s <serial> uninstall com.minimaltv.launcher
-```
-
-Não use `pm disable`, root, alterações de partição ou comandos de firmware para forçar a substituição da Home.
-
-Veja [SPEC.md](SPEC.md), [TEST_PLAN.md](TEST_PLAN.md) e [PERFORMANCE.md](PERFORMANCE.md).
+- [Especificação do MVP](SPEC.md)
+- [Produto e contexto](PRODUCT.md)
+- [Direção visual](DESIGN.md)
+- [Plano de testes](TEST_PLAN.md)
+- [Desempenho](PERFORMANCE.md)
+- [Changelog](CHANGELOG.md)
