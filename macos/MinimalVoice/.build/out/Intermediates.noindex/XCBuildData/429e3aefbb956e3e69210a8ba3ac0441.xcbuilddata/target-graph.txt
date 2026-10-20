@@ -1,0 +1,11 @@
+Target dependency graph (4 targets)
+Target 'AllIncludingTests' in project 'Aggregate'
+➜ Explicit dependency on target 'MinimalVoiceCoreTests-product' in project 'MinimalVoice'
+➜ Dependency on target 'MinimalVoiceCoreTests-product' in project 'MinimalVoice' via transitive dependency through 'MinimalVoiceCoreTests-test-runner'
+➜ Explicit dependency on target 'MinimalVoiceCore-product' in project 'MinimalVoice'
+➜ Explicit dependency on target 'MinimalVoiceCore' in project 'MinimalVoice'
+Target 'MinimalVoiceCore-product' in project 'MinimalVoice'
+➜ Explicit dependency on target 'MinimalVoiceCore' in project 'MinimalVoice'
+Target 'MinimalVoiceCoreTests-product' in project 'MinimalVoice'
+➜ Explicit dependency on target 'MinimalVoiceCore' in project 'MinimalVoice'
+Target 'MinimalVoiceCore' in project 'MinimalVoice' (no dependencies)

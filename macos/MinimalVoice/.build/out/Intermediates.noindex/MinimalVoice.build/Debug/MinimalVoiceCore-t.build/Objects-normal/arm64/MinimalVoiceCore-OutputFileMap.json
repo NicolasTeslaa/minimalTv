@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore-primary.dia",
+    "emit-module-dependencies" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore-primary-emit-module.dia",
+    "pch" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore-primary.swiftdeps"
+  },
+  "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/Sources/MinimalVoiceCore/MinimalVoiceCore.swift" : {
+    "const-values" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore.swiftconstvalues",
+    "dependencies" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore.d",
+    "diagnostics" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore.dia",
+    "index-unit-output-path" : "/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore.o",
+    "llvm-bc" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore.bc",
+    "object" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore.o",
+    "swift-dependencies" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore.swiftdeps",
+    "swiftmodule" : "/Users/tesla/Documents/GitHub/minimalTv/macos/MinimalVoice/.build/out/Intermediates.noindex/MinimalVoice.build/Debug/MinimalVoiceCore-t.build/Objects-normal/arm64/MinimalVoiceCore~partial.swiftmodule"
+  }
+}

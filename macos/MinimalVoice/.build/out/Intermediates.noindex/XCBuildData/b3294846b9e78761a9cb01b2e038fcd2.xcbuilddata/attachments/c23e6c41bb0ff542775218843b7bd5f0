@@ -1,0 +1,4 @@
+module MinimalVoiceCore {
+header "MinimalVoiceCore-Swift.h"
+export *
+}

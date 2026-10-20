@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'MinimalVoiceCoreSpec-product' in project 'MinimalVoice'
+➜ Explicit dependency on target 'MinimalVoiceCore' in project 'MinimalVoice'
+Target 'MinimalVoiceCore' in project 'MinimalVoice' (no dependencies)
