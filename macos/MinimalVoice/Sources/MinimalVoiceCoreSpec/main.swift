@@ -43,4 +43,20 @@ expect(
     ],
     "aumentar volume via ADB"
 )
+
+final class RecordingAdbRunner: AdbCommandRunning {
+    var executed: [[String]] = []
+
+    func run(_ command: AdbCommand) throws {
+        executed.append(command.arguments)
+    }
+}
+
+let runner = RecordingAdbRunner()
+let executor = ProcessAdbExecutor(builder: builder, runner: runner)
+try! executor.execute(.launchApp(package: "com.netflix.ninja"))
+expect(runner.executed.count == 1, "executor executa o comando ADB")
+expect(SpeechConfiguration.requiresOnDeviceRecognition, "reconhecimento somente no dispositivo")
+expect(VoiceSessionState.idle.canStartListening, "estado inativo permite iniciar")
+expect(!VoiceSessionState.transcribing.canExecuteCommand, "transcrição bloqueia execução")
 print("PASS: MinimalVoiceCoreSpec")

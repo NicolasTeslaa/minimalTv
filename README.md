@@ -171,6 +171,7 @@ PSS, RSS e CPU devem ser comparados sob as mesmas condições. As metas de desem
 
 ## Documentação adicional
 
+- [Minimal Voice para macOS](macos/MinimalVoice/README.md)
 - [Especificação do MVP](SPEC.md)
 - [Produto e contexto](PRODUCT.md)
 - [Direção visual](DESIGN.md)

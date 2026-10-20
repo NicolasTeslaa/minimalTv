@@ -6,10 +6,12 @@ let package = Package(
     platforms: [.macOS(.v13)],
     products: [
         .library(name: "MinimalVoiceCore", targets: ["MinimalVoiceCore"]),
-        .executable(name: "MinimalVoiceCoreSpec", targets: ["MinimalVoiceCoreSpec"])
+        .executable(name: "MinimalVoiceCoreSpec", targets: ["MinimalVoiceCoreSpec"]),
+        .executable(name: "MinimalVoiceApp", targets: ["MinimalVoiceApp"])
     ],
     targets: [
         .target(name: "MinimalVoiceCore"),
-        .executableTarget(name: "MinimalVoiceCoreSpec", dependencies: ["MinimalVoiceCore"])
+        .executableTarget(name: "MinimalVoiceCoreSpec", dependencies: ["MinimalVoiceCore"]),
+        .executableTarget(name: "MinimalVoiceApp", dependencies: ["MinimalVoiceCore"])
     ]
 )

@@ -1,5 +1,36 @@
 import Foundation
 
+public enum SpeechConfiguration {
+    public static let requiresOnDeviceRecognition = true
+}
+
+public enum TvConfiguration {
+    public static let defaultSerial = "192.168.1.9:36661"
+    public static let minimalTvPackage = "com.minimaltv.launcher"
+}
+
+public enum VoiceSessionState: Equatable, Sendable {
+    case idle
+    case listening
+    case transcribing
+    case executing
+    case success
+    case failure
+
+    public var canStartListening: Bool {
+        switch self {
+        case .idle, .success, .failure:
+            return true
+        case .listening, .transcribing, .executing:
+            return false
+        }
+    }
+
+    public var canExecuteCommand: Bool {
+        self == .listening
+    }
+}
+
 public enum TvIntent: Equatable, Sendable {
     case powerOn
     case powerOff
@@ -111,6 +142,50 @@ public struct AdbCommand: Equatable, Sendable {
     }
 }
 
+public protocol AdbCommandRunning: AnyObject {
+    func run(_ command: AdbCommand) throws
+}
+
+public enum AdbExecutionError: Error, Equatable {
+    case failed(arguments: [String], status: Int32)
+}
+
+public final class ProcessAdbRunner: AdbCommandRunning {
+    public init() {}
+
+    public func run(_ command: AdbCommand) throws {
+        let process = Process()
+        let executable = [
+            "/opt/homebrew/bin/adb",
+            "/usr/local/bin/adb",
+            "/usr/bin/adb"
+        ].first { FileManager.default.isExecutableFile(atPath: $0) } ?? "/usr/bin/env"
+        process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = executable == "/usr/bin/env" ? ["adb"] + command.arguments : command.arguments
+        try process.run()
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else {
+            throw AdbExecutionError.failed(arguments: command.arguments, status: process.terminationStatus)
+        }
+    }
+}
+
+public final class ProcessAdbExecutor {
+    public let builder: AdbCommandBuilder
+    public let runner: any AdbCommandRunning
+
+    public init(builder: AdbCommandBuilder, runner: any AdbCommandRunning = ProcessAdbRunner()) {
+        self.builder = builder
+        self.runner = runner
+    }
+
+    public func execute(_ intent: TvIntent) throws {
+        for command in builder.commands(for: intent) {
+            try runner.run(command)
+        }
+    }
+}
+
 public struct AdbCommandBuilder: Sendable {
     public let serial: String
 
@@ -127,9 +202,9 @@ public struct AdbCommandBuilder: Sendable {
         case .launchApp(let package):
             return [launch(package)]
         case .closeApp(let package):
-            return [command("shell", "am", "force-stop", package), launch("com.minimaltv.launcher")]
+            return [command("shell", "am", "force-stop", package), launch(TvConfiguration.minimalTvPackage)]
         case .returnToMinimalTv:
-            return [launch("com.minimaltv.launcher")]
+            return [launch(TvConfiguration.minimalTvPackage)]
         case .volumeUp:
             return [keyevent(24)]
         case .volumeDown:

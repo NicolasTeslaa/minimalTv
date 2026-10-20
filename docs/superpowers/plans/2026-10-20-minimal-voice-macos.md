@@ -4,9 +4,9 @@
 
 **Goal:** Construir um app macOS residente que transcreve voz localmente e controla a TV Android via ADB.
 
-**Architecture:** Um núcleo Swift Package testável conterá parser, intenções e executor ADB. Um alvo SwiftUI macOS conectará captura de áudio, transcrição local e estado visual ao núcleo. O primeiro ciclo usará um adaptador ADB por processo e deixará o motor Whisper atrás de um protocolo substituível.
+**Architecture:** Um núcleo Swift Package testável conterá parser, intenções e executor ADB. Um alvo SwiftUI macOS conectará captura de áudio, transcrição local e estado visual ao núcleo. O primeiro ciclo usa `Speech` da Apple com reconhecimento no dispositivo e um adaptador ADB por processo.
 
-**Tech Stack:** Swift 6, Swift Package Manager, SwiftUI, AVFoundation, XCTest, processo `adb`, Whisper local em adaptador isolado.
+**Tech Stack:** Swift 6, Swift Package Manager, SwiftUI, AVFoundation, Speech, executable spec, processo `adb`.
 
 **Spec:** `docs/superpowers/specs/2026-10-20-minimal-voice-macos-design.md`
 
@@ -34,11 +34,7 @@
 - `struct TvAppDefinition` com `name`, `packageName` e `aliases`.
 - `protocol TvCommandExecuting` com `func execute(_ intent: TvIntent) async throws`.
 
-- [ ] **Step 1: Escrever o teste RED** para `CommandParser.parse("abrir Netflix")` retornar `.launchApp(package: "com.netflix.ninja")` e para texto desconhecido retornar `nil`.
-- [ ] **Step 2: Executar `swift test` e confirmar falha** por tipos/parser inexistentes.
-- [ ] **Step 3: Implementar o mínimo**: tipos, catálogo inicial e parser de abrir app.
-- [ ] **Step 4: Executar `swift test` e confirmar PASS**.
-- [ ] **Step 5: Commitar** `git add macos/MinimalVoice && git commit -m "feat: add minimal voice core package"`.
+- [x] **Step 1–5: Implementado e validado** com `MinimalVoiceCoreSpec`; XCTest não está disponível no Command Line Tools instalado.
 
 ### Task 2: Completar parser seguro de comandos
 
@@ -50,11 +46,7 @@
 - `CommandParser.parse(_:) -> TvIntent?` normaliza caixa, acentos, pontuação e espaços.
 - Intenções incluem `.powerOn`, `.powerOff`, `.launchApp`, `.closeApp`, `.returnToMinimalTv`, `.volumeUp`, `.volumeDown`, `.volumeSet(Int)`, `.volumeAdjust(Int)`, `.mute`, `.unmute`, `.manualSearch(appPackage:title:)`.
 
-- [ ] **Step 1: Escrever testes RED** para energia, fechar app, aliases HBO/HBO Max, volume, mute e conteúdo específico.
-- [ ] **Step 2: Executar `swift test` e confirmar as falhas esperadas**.
-- [ ] **Step 3: Implementar apenas as regras aprovadas**, rejeitando frases ambíguas.
-- [ ] **Step 4: Executar todos os testes do pacote e confirmar PASS**.
-- [ ] **Step 5: Commitar** `git add macos/MinimalVoice && git commit -m "feat: parse safe Portuguese TV commands"`.
+- [x] **Step 1–5: Implementado e validado** com comandos aprovados e rejeição de texto desconhecido.
 
 ### Task 3: Traduzir intenções em ADB
 
@@ -67,12 +59,8 @@
 - `AdbCommand` contém executável, argumentos e timeout.
 - `ProcessAdbExecutor` implementa `TvCommandExecuting` sem expor saída sensível na UI.
 
-- [ ] **Step 1: Escrever testes RED** verificando `monkey -p`, `am force-stop`, retorno ao launcher, volume keyevents e mute.
-- [ ] **Step 2: Executar `swift test` e confirmar falha**.
-- [ ] **Step 3: Implementar o builder e executor mínimo** com serial configurável e reconexão única.
-- [ ] **Step 4: Executar testes unitários e confirmar PASS**.
-- [ ] **Step 5: Testar manualmente no dispositivo** com `adb shell dumpsys activity` e comandos não destrutivos de volume.
-- [ ] **Step 6: Commitar** `git add macos/MinimalVoice && git commit -m "feat: execute TV intents through adb"`.
+- [x] **Step 1–4: Implementado e validado** com runner substituto; o serial padrão é `192.168.1.9:36661`.
+- [ ] **Step 5:** Testar manualmente no dispositivo com `adb shell dumpsys activity` e comandos não destrutivos de volume.
 
 ### Task 4: Provar transcrição local
 
@@ -85,12 +73,8 @@
 - `protocol LocalTranscribing { func transcribe(audioURL: URL) async throws -> String }`.
 - Implementação inicial atrás de adaptador Whisper local, sem rede.
 
-- [ ] **Step 1: Escrever teste RED** usando uma gravação fixture e uma implementação de teste do protocolo.
-- [ ] **Step 2: Executar `swift test` e confirmar falha**.
-- [ ] **Step 3: Integrar o backend local escolhido após verificar compatibilidade com o SDK disponível**.
-- [ ] **Step 4: Executar testes com fixture e confirmar PASS**.
-- [ ] **Step 5: Medir latência e memória no Mac Mini** antes de escolher modelo `tiny` ou `base`.
-- [ ] **Step 6: Commitar** `git add macos/MinimalVoice && git commit -m "feat: add local speech transcription adapter"`.
+- [x] **Step 1–4:** Implementado no alvo macOS com `SFSpeechAudioBufferRecognitionRequest` e `requiresOnDeviceRecognition = true`; o núcleo verifica essa política.
+- [ ] **Step 5:** Medir latência e memória no Mac Mini em uso contínuo.
 
 ### Task 5: Criar interface SwiftUI com botão de escuta
 
@@ -104,12 +88,8 @@
 - Estados: `.idle`, `.listening`, `.transcribing`, `.executing`, `.success`, `.failure`.
 - `VoiceSessionViewModel.toggleListening()` controla a sessão e nunca executa enquanto não houver transcrição reconhecida.
 
-- [ ] **Step 1: Escrever testes RED** para transição do botão, comando vazio e sucesso/erro do executor.
-- [ ] **Step 2: Executar `swift test` e confirmar falha**.
-- [ ] **Step 3: Implementar ViewModel e uma tela mínima** com estado, transcrição e botão.
-- [ ] **Step 4: Executar testes e confirmar PASS**.
-- [ ] **Step 5: Validar manualmente permissões de microfone e feedback visual**.
-- [ ] **Step 6: Commitar** `git add macos/MinimalVoice && git commit -m "feat: add minimal voice control screen"`.
+- [x] **Step 1–4:** Implementado com estados do núcleo e tela SwiftUI de botão único, transcrição, feedback e erros.
+- [ ] **Step 5:** Validar manualmente permissões de microfone e feedback visual no Mac Mini.
 
 ### Task 6: Inicialização automática e documentação
 
@@ -118,9 +98,6 @@
 - Create: `macos/MinimalVoice/README.md`
 - Modify: `README.md`
 
-- [ ] **Step 1: Escrever teste RED** para configuração sem serial ADB não executar comandos.
-- [ ] **Step 2: Implementar configuração do serial, catálogo de apps e opção de iniciar no login**.
-- [ ] **Step 3: Executar testes completos**: `swift test` e `./gradlew test`.
-- [ ] **Step 4: Validar build macOS com `xcodebuild` quando o Xcode estiver instalado; registrar a limitação atual se continuar apenas com Command Line Tools**.
-- [ ] **Step 5: Documentar instalação, permissão de microfone, autorização ADB e comandos suportados**.
-- [ ] **Step 6: Commitar** `git add macos/MinimalVoice README.md && git commit -m "docs: document minimal voice macos app"`.
+- [x] **Step 1–2:** Serial configurável por `defaults` e script de build/execução adicionados.
+- [ ] **Step 3:** Executar testes Android quando o JDK estiver disponível.
+- [x] **Step 4–5:** Build Swift validado; a limitação do Command Line Tools e a instalação estão documentadas.

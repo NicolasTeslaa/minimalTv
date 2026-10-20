@@ -1,0 +1,33 @@
+# Minimal Voice
+
+Aplicação macOS local para controlar o Minimal TV por voz. A transcrição usa o framework Speech da Apple com `requiresOnDeviceRecognition = true`; nenhum áudio ou comando é enviado para a nuvem.
+
+## Executar no Mac Mini
+
+```bash
+cd macos/MinimalVoice
+./scripts/build-and-run.sh
+```
+
+Na primeira execução, autorize o microfone e o reconhecimento de voz. O Mac precisa estar na mesma rede da TV e o ADB precisa estar autorizado.
+
+O serial padrão é `192.168.1.9:36661`. Para trocar:
+
+```bash
+defaults write com.minimaltv.voice tvSerial 192.168.1.9:36661
+```
+
+## Comandos
+
+O botão inicia e para a escuta. Exemplos: `abrir Netflix`, `fechar HBO Max`, `ligar televisão`, `desligar TV`, `aumentar volume`, `abaixar volume em 10`, `volume em 30`, `mutar televisão` e `voltar para o Minimal TV`.
+
+Comandos de conteúdo como `abrir Supernatural na HBO` abrem o aplicativo e informam que a busca deve ser feita manualmente.
+
+## Verificação
+
+Como este ambiente tem apenas o Command Line Tools, o teste do núcleo é um executable spec:
+
+```bash
+swift run MinimalVoiceCoreSpec
+swift build --product MinimalVoiceApp
+```
