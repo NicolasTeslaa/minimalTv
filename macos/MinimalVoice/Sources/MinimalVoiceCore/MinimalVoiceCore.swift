@@ -97,15 +97,15 @@ public struct CommandParser: Sendable {
             return .volumeSet(amount)
         }
 
-        if normalized.hasPrefix("abrir "), let app = Self.app(for: normalized) {
+        if (normalized.hasPrefix("abrir ") || normalized.hasPrefix("abre ")), let app = Self.app(for: normalized) {
             return .launchApp(package: app.package)
         }
-        if normalized.hasPrefix("fechar "), let app = Self.app(for: normalized) {
+        if (normalized.hasPrefix("fechar ") || normalized.hasPrefix("fecha ")), let app = Self.app(for: normalized) {
             return .closeApp(package: app.package)
         }
 
         for app in Self.apps where normalized.hasSuffix(" na \(app.alias)") {
-            let prefix = "abrir "
+            let prefix = normalized.hasPrefix("abre ") ? "abre " : "abrir "
             guard normalized.hasPrefix(prefix) else { continue }
             let titleEnd = normalized.count - (" na \(app.alias)".count)
             let titleStart = normalized.index(normalized.startIndex, offsetBy: prefix.count)
@@ -131,7 +131,10 @@ public struct CommandParser: Sendable {
     }
 
     private static func app(for text: String) -> (alias: String, package: String)? {
-        apps.first { text == "abrir \($0.alias)" || text == "fechar \($0.alias)" }
+        apps.first {
+            text == "abrir \($0.alias)" || text == "abre \($0.alias)" ||
+            text == "fechar \($0.alias)" || text == "fecha \($0.alias)"
+        }
     }
 
     private static let apps = [

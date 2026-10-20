@@ -10,6 +10,8 @@ func expect(_ condition: @autoclosure () -> Bool, _ message: String) {
 
 let parser = CommandParser()
 expect(parser.parse("abrir Netflix") == .launchApp(package: "com.netflix.ninja"), "abrir Netflix")
+expect(parser.parse("abre HBO") == .launchApp(package: "com.hbo.hbonow"), "abre HBO")
+expect(parser.parse("fecha Netflix") == .closeApp(package: "com.netflix.ninja"), "fecha Netflix")
 expect(parser.parse("ligar televisão") == .powerOn, "ligar televisão")
 expect(parser.parse("desligar a TV") == .powerOff, "desligar TV")
 expect(parser.parse("fechar HBO Max") == .closeApp(package: "com.hbo.hbonow"), "fechar HBO Max")
