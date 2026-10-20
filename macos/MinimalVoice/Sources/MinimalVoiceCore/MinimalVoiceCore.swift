@@ -111,8 +111,9 @@ public struct CommandParser: Sendable {
         }
 
         for app in Self.apps where normalized.hasSuffix(" na \(app.alias)") {
-            let prefix = normalized.hasPrefix("abre ") ? "abre " : "abrir "
-            guard normalized.hasPrefix(prefix) else { continue }
+            let prefix = ["abrir ", "abre ", "coloca ", "coloque ", "poe ", "põe ", "passa ", "assistir ", "assista "]
+                .first { normalized.hasPrefix($0) }
+            guard let prefix else { continue }
             let titleEnd = normalized.count - (" na \(app.alias)".count)
             let titleStart = normalized.index(normalized.startIndex, offsetBy: prefix.count)
             let titleEndIndex = normalized.index(normalized.startIndex, offsetBy: titleEnd)

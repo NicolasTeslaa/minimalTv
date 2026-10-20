@@ -26,6 +26,11 @@ expect(
         .manualSearch(appPackage: "com.wbd.stream", title: "Supernatural"),
     "busca manual na HBO"
 )
+expect(
+    parser.parse("coloca Supernatural na HBO") ==
+        .manualSearch(appPackage: "com.wbd.stream", title: "Supernatural"),
+    "coloca conteúdo na HBO"
+)
 expect(parser.parse("fazer alguma coisa que não existe") == nil, "comando desconhecido")
 
 let builder = AdbCommandBuilder(serial: "192.168.1.9:5555")
