@@ -4,6 +4,15 @@ public enum SpeechConfiguration {
     public static let requiresOnDeviceRecognition = true
 }
 
+public enum SpeechSetupGuide {
+    public static let title = "Ative Siri e Ditado para usar a voz"
+    public static let steps = [
+        "Abra Ajustes do Sistema > Siri e Spotlight e ative Siri.",
+        "Abra Ajustes do Sistema > Teclado > Ditado e ative Ditado.",
+        "Em Privacidade e Segurança > Microfone, permita o acesso do Minimal Voice."
+    ]
+}
+
 public enum TvConfiguration {
     public static let defaultSerial = "192.168.1.9:36661"
     public static let minimalTvPackage = "com.minimaltv.launcher"

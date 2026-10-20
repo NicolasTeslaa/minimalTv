@@ -1,4 +1,5 @@
 import AVFoundation
+import AppKit
 import Speech
 import SwiftUI
 import MinimalVoiceCore
@@ -9,6 +10,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     @Published private(set) var transcript = ""
     @Published private(set) var feedback = "Pronto para ouvir"
     @Published private(set) var errorMessage: String?
+    @Published private(set) var needsSpeechSetup = false
 
     private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "pt-BR"))
     private let audioEngine = AVAudioEngine()
@@ -33,6 +35,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
 
     private func startListening() {
         errorMessage = nil
+        needsSpeechSetup = false
         transcript = ""
         feedback = "Ouvindo…"
         state = .listening
@@ -41,13 +44,13 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
             Task { @MainActor in
                 guard let self else { return }
                 guard authorization == .authorized else {
-                    self.fail("Permissão de reconhecimento de voz não concedida")
+                    self.fail("O reconhecimento de voz está desativado", speechSetup: true)
                     return
                 }
                 do {
                     try self.beginRecognition()
                 } catch {
-                    self.fail("Não foi possível acessar o microfone: \(error.localizedDescription)")
+                    self.fail("Não foi possível iniciar a escuta: \(error.localizedDescription)", speechSetup: true)
                 }
             }
         }
@@ -76,7 +79,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
                     if result.isFinal { self.executeTranscript() }
                 }
                 if let error, self.state == .listening {
-                    self.fail(error.localizedDescription)
+                    self.fail(error.localizedDescription, speechSetup: true)
                 }
             }
         }
@@ -121,7 +124,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         }
     }
 
-    private func fail(_ message: String) {
+    private func fail(_ message: String, speechSetup: Bool = false) {
         audioEngine.stop()
         if audioEngine.inputNode.numberOfInputs > 0 {
             audioEngine.inputNode.removeTap(onBus: 0)
@@ -131,7 +134,13 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         recognitionTask = nil
         state = .failure
         errorMessage = message
+        needsSpeechSetup = speechSetup
         feedback = "Tente novamente"
+    }
+
+    func openSpeechSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.Siri-Settings") else { return }
+        NSWorkspace.shared.open(url)
     }
 }
 
@@ -172,6 +181,24 @@ struct MinimalVoiceView: View {
                     .font(.callout)
                     .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
+            }
+
+            if controller.needsSpeechSetup {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(SpeechSetupGuide.title)
+                        .font(.headline)
+                    ForEach(Array(SpeechSetupGuide.steps.enumerated()), id: \.offset) { index, step in
+                        Text("\(index + 1). \(step)")
+                            .font(.callout)
+                    }
+                    Button("Abrir Ajustes do Sistema") {
+                        controller.openSpeechSettings()
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
+                .background(Color.orange.opacity(0.14), in: RoundedRectangle(cornerRadius: 14))
             }
 
             Text("Comandos: Netflix, HBO Max, Prime Video, volume, mudo e Minimal TV")
