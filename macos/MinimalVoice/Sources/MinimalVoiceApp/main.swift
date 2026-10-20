@@ -21,6 +21,8 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     private let parser = CommandParser()
     private let executor: ProcessAdbExecutor
     private let commandLog = VoiceCommandLogger()
+    private let announcer = SpeechAnnouncer()
+    private var audioTapInstalled = false
 
     init(serial: String = UserDefaults.standard.string(forKey: "tvSerial") ?? TvConfiguration.defaultSerial) {
         let resolvedSerial = UserDefaults.standard.string(forKey: "tvSerial") ?? ProcessAdbDeviceDiscovery().firstAvailableSerial() ?? serial
@@ -71,10 +73,11 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
 
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
-        inputNode.removeTap(onBus: 0)
+        removeAudioTapIfNeeded()
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
             self?.recognitionRequest?.append(buffer)
         }
+        audioTapInstalled = true
 
         recognitionTask = recognizer?.recognitionTask(with: request) { [weak self] result, error in
             Task { @MainActor in
@@ -97,7 +100,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     private func stopListening() {
         automaticExecutionTask?.cancel()
         audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
+        removeAudioTapIfNeeded()
         recognitionRequest?.endAudio()
         state = .transcribing
         feedback = "Processando…"
@@ -119,7 +122,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         automaticExecutionTask?.cancel()
         automaticExecutionTask = nil
         audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
+        removeAudioTapIfNeeded()
         recognitionRequest = nil
         recognitionTask = nil
 
@@ -132,12 +135,14 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         state = .executing
 
         if case let .manualSearch(_, title) = intent {
+            announcer.speak("Ok, executando")
             state = .success
             feedback = "Abra o app e pesquise \"\(title)\" manualmente"
             return
         }
 
         do {
+            announcer.speak("Ok, executando")
             try executor.execute(intent)
             state = .success
             feedback = "Comando executado"
@@ -150,9 +155,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         automaticExecutionTask?.cancel()
         automaticExecutionTask = nil
         audioEngine.stop()
-        if audioEngine.inputNode.numberOfInputs > 0 {
-            audioEngine.inputNode.removeTap(onBus: 0)
-        }
+        removeAudioTapIfNeeded()
         recognitionRequest = nil
         recognitionTask?.cancel()
         recognitionTask = nil
@@ -160,6 +163,12 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         errorMessage = message
         needsSpeechSetup = speechSetup
         feedback = "Tente novamente"
+    }
+
+    private func removeAudioTapIfNeeded() {
+        guard audioTapInstalled else { return }
+        audioEngine.inputNode.removeTap(onBus: 0)
+        audioTapInstalled = false
     }
 
     private func scheduleAutomaticExecution() {
@@ -181,6 +190,21 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     func openSpeechSettings() {
         guard let url = URL(string: "x-apple.systempreferences:com.apple.Siri-Settings") else { return }
         NSWorkspace.shared.open(url)
+    }
+}
+
+final class SpeechAnnouncer {
+    private let synthesizer = AVSpeechSynthesizer()
+
+    func speak(_ phrase: String) {
+        let utterance = AVSpeechUtterance(string: phrase)
+        utterance.rate = 0.48
+        utterance.volume = 0.9
+        utterance.voice = AVSpeechSynthesisVoice.speechVoices()
+            .first { $0.language == "pt-BR" }
+            ?? AVSpeechSynthesisVoice(language: "pt-BR")
+        synthesizer.stopSpeaking(at: .immediate)
+        synthesizer.speak(utterance)
     }
 }
 
