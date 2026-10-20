@@ -137,9 +137,16 @@ public struct CommandParser: Sendable {
     }
 
     private static func app(for text: String) -> (alias: String, package: String)? {
-        apps.first {
-            text == "abrir \($0.alias)" || text == "abre \($0.alias)" ||
-            text == "fechar \($0.alias)" || text == "fecha \($0.alias)"
+        apps.first { app in
+            ["abrir", "abre", "fechar", "fecha"].contains { action in
+                let prefix = "\(action) "
+                guard text.hasPrefix(prefix) else { return false }
+                var target = String(text.dropFirst(prefix.count))
+                if target.hasPrefix("a ") || target.hasPrefix("o ") {
+                    target = String(target.dropFirst(2))
+                }
+                return target == app.alias
+            }
         }
     }
 
