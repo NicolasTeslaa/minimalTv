@@ -62,6 +62,7 @@ try! executor.execute(.launchApp(package: "com.netflix.ninja"))
 expect(runner.executed.count == 2, "executor acorda a TV e executa o comando ADB")
 expect(SpeechConfiguration.requiresOnDeviceRecognition, "reconhecimento somente no dispositivo")
 expect(SpeechConfiguration.automaticExecutionPauseNanoseconds > 0, "execução automática após pausa")
+expect(VoiceCommandLog.format(status: "unrecognized", phrase: " abre HBO ").contains("unrecognized\tabre HBO"), "registro de comando não entendido")
 expect(SpeechSetupGuide.steps.contains { $0.localizedCaseInsensitiveContains("Siri") }, "orientação para ativar Siri")
 expect(SpeechSetupGuide.steps.contains { $0.localizedCaseInsensitiveContains("Ditado") }, "orientação para ativar Ditado")
 expect(

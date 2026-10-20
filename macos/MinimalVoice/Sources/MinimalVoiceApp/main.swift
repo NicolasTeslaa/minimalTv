@@ -20,6 +20,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     private var automaticExecutionTask: Task<Void, Never>?
     private let parser = CommandParser()
     private let executor: ProcessAdbExecutor
+    private let commandLog = VoiceCommandLogger()
 
     init(serial: String = UserDefaults.standard.string(forKey: "tvSerial") ?? TvConfiguration.defaultSerial) {
         let resolvedSerial = UserDefaults.standard.string(forKey: "tvSerial") ?? ProcessAdbDeviceDiscovery().firstAvailableSerial() ?? serial
@@ -95,12 +96,22 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
 
     private func stopListening() {
         automaticExecutionTask?.cancel()
-        automaticExecutionTask = nil
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
         state = .transcribing
         feedback = "Processando…"
+        automaticExecutionTask = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: 900_000_000)
+            } catch {
+                return
+            }
+            await MainActor.run {
+                guard let self, self.state == .transcribing else { return }
+                self.executeTranscript()
+            }
+        }
     }
 
     private func executeTranscript() {
@@ -113,9 +124,11 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         recognitionTask = nil
 
         guard let intent = parser.parse(transcript) else {
+            commandLog.record(status: "unrecognized", phrase: transcript)
             fail("Não entendi esse comando")
             return
         }
+        commandLog.record(status: "recognized", phrase: transcript)
         state = .executing
 
         if case let .manualSearch(_, title) = intent {
@@ -159,7 +172,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
             }
             guard !Task.isCancelled else { return }
             await MainActor.run {
-                guard let self, self.state == .listening, self.parser.parse(self.transcript) != nil else { return }
+                guard let self, self.state == .listening, !self.transcript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
                 self.executeTranscript()
             }
         }
@@ -168,6 +181,33 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     func openSpeechSettings() {
         guard let url = URL(string: "x-apple.systempreferences:com.apple.Siri-Settings") else { return }
         NSWorkspace.shared.open(url)
+    }
+}
+
+final class VoiceCommandLogger {
+    private let fileURL: URL
+
+    init() {
+        let library = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!
+        fileURL = library.appendingPathComponent("Logs/MinimalVoice/commands.log")
+    }
+
+    func record(status: String, phrase: String) {
+        do {
+            try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            let timestamp = ISO8601DateFormatter().string(from: Date())
+            let line = "\(timestamp)\t" + VoiceCommandLog.format(status: status, phrase: phrase)
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                let handle = try FileHandle(forWritingTo: fileURL)
+                try handle.seekToEnd()
+                try handle.write(contentsOf: Data(line.utf8))
+                try handle.close()
+            } else {
+                try Data(line.utf8).write(to: fileURL, options: .atomic)
+            }
+        } catch {
+            // Logging must never interrupt voice control.
+        }
     }
 }
 

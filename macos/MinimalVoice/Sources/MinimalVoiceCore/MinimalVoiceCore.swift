@@ -14,6 +14,12 @@ public enum SpeechSetupGuide {
     ]
 }
 
+public enum VoiceCommandLog {
+    public static func format(status: String, phrase: String) -> String {
+        "\(status)\t\(phrase.trimmingCharacters(in: .whitespacesAndNewlines))\n"
+    }
+}
+
 public enum TvConfiguration {
     public static let defaultSerial = "192.168.1.9:36661"
     public static let minimalTvPackage = "com.minimaltv.launcher"
