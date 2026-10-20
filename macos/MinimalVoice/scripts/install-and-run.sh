@@ -13,7 +13,10 @@ BUILD_APP="$BIN_DIR/Minimal Voice.app"
 
 mkdir -p "$INSTALL_DIR"
 rm -rf "$INSTALL_APP"
-ditto "$BUILD_APP" "$INSTALL_APP"
+mkdir -p "$INSTALL_APP/Contents/MacOS" "$INSTALL_APP/Contents/Resources"
+cp "$BIN_DIR/MinimalVoiceApp" "$INSTALL_APP/Contents/MacOS/MinimalVoiceApp"
+cp "$PROJECT_DIR/Resources/Info.plist" "$INSTALL_APP/Contents/Info.plist"
+cp "$PROJECT_DIR/Resources/MinimalVoice.icns" "$INSTALL_APP/Contents/Resources/MinimalVoice.icns"
 
 # Mantém o bundle instalável e identificável pelo macOS.
 codesign --force --deep --sign - "$INSTALL_APP"

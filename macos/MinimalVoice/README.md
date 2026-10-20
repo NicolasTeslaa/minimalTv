@@ -27,9 +27,11 @@ defaults write com.minimaltv.voice tvSerial 192.168.1.9:36661
 
 ## Comandos
 
-O botão inicia e para a escuta. Exemplos: `abrir Netflix`, `fechar HBO Max`, `ligar televisão`, `desligar TV`, `aumentar volume`, `abaixar volume em 10`, `volume em 30`, `mutar televisão` e `voltar para o Minimal TV`.
+O botão inicia e para a escuta. Depois de iniciar, a sessão continua ouvindo mesmo após executar comandos; clique em **Parar de escutar** quando quiser encerrar. Exemplos: `abrir Netflix`, `fechar HBO Max`, `ligar televisão`, `desligar TV`, `aumentar volume`, `abaixar volume em 10`, `volume em 30`, `mutar televisão` e `voltar para o Minimal TV`.
 
 Comandos de conteúdo como `abrir Supernatural na HBO` abrem o aplicativo e informam que a busca deve ser feita manualmente.
+
+Comandos não entendidos e reconhecidos ficam registrados em `~/Library/Logs/MinimalVoice/commands.log` para diagnóstico.
 
 ## Verificação
 

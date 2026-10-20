@@ -13,16 +13,20 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     @Published private(set) var needsSpeechSetup = false
     let tvSerial: String
 
+    var isContinuouslyListening: Bool { wantsContinuousListening }
+
     private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "pt-BR"))
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     private var automaticExecutionTask: Task<Void, Never>?
+    private var resumeListeningTask: Task<Void, Never>?
     private let parser = CommandParser()
     private let executor: ProcessAdbExecutor
     private let commandLog = VoiceCommandLogger()
     private let announcer = SpeechAnnouncer()
     private var audioTapInstalled = false
+    private var wantsContinuousListening = false
 
     init(serial: String = UserDefaults.standard.string(forKey: "tvSerial") ?? TvConfiguration.defaultSerial) {
         let resolvedSerial = UserDefaults.standard.string(forKey: "tvSerial") ?? ProcessAdbDeviceDiscovery().firstAvailableSerial() ?? serial
@@ -33,9 +37,9 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
     }
 
     func toggleListening() {
-        if state == .listening {
+        if wantsContinuousListening {
             stopListening()
-        } else if state.canStartListening {
+        } else {
             startListening()
         }
     }
@@ -46,10 +50,12 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         transcript = ""
         feedback = "Ouvindo…"
         state = .listening
+        wantsContinuousListening = true
 
         SFSpeechRecognizer.requestAuthorization { [weak self] authorization in
             Task { @MainActor in
                 guard let self else { return }
+                guard self.wantsContinuousListening else { return }
                 guard authorization == .authorized else {
                     self.fail("O reconhecimento de voz está desativado", speechSetup: true)
                     return
@@ -99,9 +105,14 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
 
     private func stopListening() {
         automaticExecutionTask?.cancel()
+        resumeListeningTask?.cancel()
+        resumeListeningTask = nil
+        wantsContinuousListening = false
         audioEngine.stop()
         removeAudioTapIfNeeded()
         recognitionRequest?.endAudio()
+        recognitionTask?.cancel()
+        recognitionTask = nil
         state = .transcribing
         feedback = "Processando…"
         automaticExecutionTask = Task { [weak self] in
@@ -124,6 +135,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         audioEngine.stop()
         removeAudioTapIfNeeded()
         recognitionRequest = nil
+        recognitionTask?.cancel()
         recognitionTask = nil
 
         guard let intent = parser.parse(transcript) else {
@@ -138,6 +150,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
             announcer.speak("Ok, executando")
             state = .success
             feedback = "Abra o app e pesquise \"\(title)\" manualmente"
+            resumeListeningIfNeeded()
             return
         }
 
@@ -146,6 +159,7 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
             try executor.execute(intent)
             state = .success
             feedback = "Comando executado"
+            resumeListeningIfNeeded()
         } catch {
             fail("Falha ao falar com a TV: \(error.localizedDescription)")
         }
@@ -163,12 +177,31 @@ final class VoiceController: NSObject, ObservableObject, SFSpeechRecognizerDeleg
         errorMessage = message
         needsSpeechSetup = speechSetup
         feedback = "Tente novamente"
+        if !speechSetup {
+            resumeListeningIfNeeded()
+        }
     }
 
     private func removeAudioTapIfNeeded() {
         guard audioTapInstalled else { return }
         audioEngine.inputNode.removeTap(onBus: 0)
         audioTapInstalled = false
+    }
+
+    private func resumeListeningIfNeeded() {
+        guard wantsContinuousListening else { return }
+        resumeListeningTask?.cancel()
+        resumeListeningTask = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: 1_500_000_000)
+            } catch {
+                return
+            }
+            await MainActor.run {
+                guard let self, self.wantsContinuousListening else { return }
+                self.startListening()
+            }
+        }
     }
 
     private func scheduleAutomaticExecution() {
@@ -260,15 +293,15 @@ struct MinimalVoiceView: View {
             .padding(24)
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
 
-            Button(controller.state == .listening ? "Parar e executar" : "Começar a escutar") {
+            Button(controller.isContinuouslyListening ? "Parar de escutar" : "Começar a escutar") {
                 controller.toggleListening()
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .keyboardShortcut(.space, modifiers: [])
 
-            if controller.state == .listening {
-                Text("Fale um comando; ele será executado após uma breve pausa.")
+            if controller.isContinuouslyListening {
+                Text("Fale os comandos normalmente; a escuta continua ativa.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

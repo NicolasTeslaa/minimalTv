@@ -8,6 +8,8 @@
 	<string>MinimalVoiceApp</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.minimaltv.voice</string>
+	<key>CFBundleIconFile</key>
+	<string>MinimalVoice</string>
 	<key>CFBundleName</key>
 	<string>Minimal Voice</string>
 	<key>CFBundlePackageType</key>

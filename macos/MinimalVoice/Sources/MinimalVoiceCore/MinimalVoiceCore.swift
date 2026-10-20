@@ -77,10 +77,10 @@ public struct CommandParser: Sendable {
         if normalized == "voltar para o minimal tv" || normalized == "abrir minimal tv" {
             return .returnToMinimalTv
         }
-        if normalized == "aumentar volume" || normalized == "volume mais alto" {
+        if normalized == "aumentar volume" || normalized == "aumenta volume" || normalized == "aumenta o volume" || normalized == "volume mais alto" || normalized == "sobe o volume" {
             return .volumeUp
         }
-        if normalized == "abaixar volume" || normalized == "diminuir volume" || normalized == "volume mais baixo" {
+        if normalized == "abaixar volume" || normalized == "abaixa volume" || normalized == "abaixa o volume" || normalized == "baixar volume" || normalized == "baixa volume" || normalized == "baixa o volume" || normalized == "diminuir volume" || normalized == "diminui volume" || normalized == "diminui o volume" || normalized == "volume mais baixo" {
             return .volumeDown
         }
         if normalized == "mutar televisao" || normalized == "mutar tv" || normalized == "silenciar televisao" {

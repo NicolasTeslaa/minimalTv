@@ -17,6 +17,8 @@ expect(parser.parse("ligar televisão") == .powerOn, "ligar televisão")
 expect(parser.parse("desligar a TV") == .powerOff, "desligar TV")
 expect(parser.parse("fechar HBO Max") == .closeApp(package: "com.wbd.stream"), "fechar HBO Max")
 expect(parser.parse("aumentar volume") == .volumeUp, "aumentar volume")
+expect(parser.parse("aumenta o volume") == .volumeUp, "aumenta o volume")
+expect(parser.parse("baixa o volume") == .volumeDown, "baixa o volume")
 expect(parser.parse("abaixar volume em 10") == .volumeAdjust(-10), "abaixar volume em 10")
 expect(parser.parse("mutar televisão") == .mute, "mutar televisão")
 expect(
