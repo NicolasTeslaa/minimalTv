@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.minimaltv.launcher.ui.GradientBackgroundView
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -17,6 +18,19 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
+    @Test fun homeUsesGradientBackdrop() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val activity = instrumentation.startActivitySync(
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        ) as MainActivity
+        try {
+            assertTrue(activity.findViewById<View>(R.id.mainRoot) is GradientBackgroundView)
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+        }
+    }
+
     @Test fun longOkOffersFavoriteAction() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext

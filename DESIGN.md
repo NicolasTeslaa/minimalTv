@@ -8,19 +8,19 @@ Interface Android TV de operação por D-pad, vista à distância em 1280×720 l
 
 | Papel | HEX |
 |---|---|
-| Fundo | `#0F1218` |
-| Superfície de cartões | `#1B202B` |
-| Texto principal | `#F4F5F7` |
-| Principal e foco | `#BCA0FF` |
-| Destaque secundário | `#E8D8FF` |
+| Fundo | `#050A19` |
+| Superfície de cartões | `#182B47` com transparência |
+| Texto principal | `#F4F7FF` |
+| Principal e foco | `#79C8FF` |
+| Destaque secundário | `#B9C8E6` |
 
-Paleta violeta proposta e escolhida pelo usuário; não foi extraída de referências. Texto principal/fundo: 17,07:1; texto principal/superfície: 14,47:1; fundo/botão principal: 9,01:1 (cálculo WCAG). Estados de foco serão validados no dispositivo.
+Paleta azul-roxa com ondas desenhadas nativamente, escolhida a partir da referência enviada pelo usuário; não foi extraída de referências externas. Texto principal/fundo: 18,42:1; foco/fundo: 10,83:1 (cálculo WCAG). Estados de foco serão validados no dispositivo.
 
 ## Estrutura
 
 - Margens seguras para overscan.
 - Topo: nome e subtítulo à esquerda; relógio e configurações à direita.
-- Centro: título “Aplicativos” e grade de 6 colunas na resolução lógica 1280×720. Cada cartão compacto mostra ícone real de 48dp, nome e foco visível por contorno e cor, sem blur.
+- Centro: título “Aplicativos” e grade de 6 colunas na resolução lógica 1280×720. Cada cartão compacto mostra ícone real de 48dp, nome, superfície azul translúcida e foco azul luminoso por contorno, sem blur.
 - Rodapé: ações de favoritos e configurações.
 - Movimentos discretos ou imediatos; nenhuma animação decorativa e nenhuma atualização por segundo do relógio.
 

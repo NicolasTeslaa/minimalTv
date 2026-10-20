@@ -10,6 +10,8 @@
 - Launch explícito inclui a categoria Leanback, compatível com atividades como
   `com.wbd.stream/com.wbd.beam.BeamActivity`.
 - Home compactada para seis colunas em 1280×720, ícones de 48dp e paleta violeta silenciosa.
+- Home recebeu fundo nativo em ondas azul-roxas, cards translúcidos, foco azul luminoso
+  e pill de relógio/configurações alinhado à referência enviada.
 
 ### Verificação desta rodada
 

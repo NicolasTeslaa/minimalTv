@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.minimaltv.launcher.ui.GradientBackgroundView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mainRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -21,13 +21,20 @@
                 android:text="Your apps. Nothing else." android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
         </LinearLayout>
-        <TextView android:id="@+id/clock" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:layout_marginEnd="14dp"
-            android:textColor="@color/text_primary" android:textSize="20sp" />
-        <ImageView android:id="@+id/topSettings" android:layout_width="48dp"
-            android:layout_height="48dp" android:background="@drawable/action_button"
-            android:contentDescription="Configurações" android:focusable="true"
-            android:clickable="true" android:padding="12dp" android:src="@drawable/ic_settings" />
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="48dp"
+            android:background="@drawable/header_pill" android:gravity="center_vertical"
+            android:orientation="horizontal" android:paddingStart="16dp" android:paddingEnd="8dp">
+            <TextView android:id="@+id/clock" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textColor="@color/text_primary"
+                android:textSize="20sp" />
+            <View android:layout_width="1dp" android:layout_height="24dp"
+                android:layout_marginStart="16dp" android:layout_marginEnd="6dp"
+                android:background="#557AA6E0" />
+            <ImageView android:id="@+id/topSettings" android:layout_width="40dp"
+                android:layout_height="40dp" android:background="@drawable/icon_button"
+                android:contentDescription="Configurações" android:focusable="true"
+                android:clickable="true" android:padding="9dp" android:src="@drawable/ic_settings" />
+        </LinearLayout>
     </LinearLayout>
 
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -64,4 +71,4 @@
             android:text="Configurações" android:textColor="@color/text_primary"
             android:textSize="14sp" />
     </LinearLayout>
-</LinearLayout>
+</com.minimaltv.launcher.ui.GradientBackgroundView>
